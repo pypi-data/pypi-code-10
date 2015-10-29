@@ -1,0 +1,2 @@
+class FormClass(type):
+    pass
