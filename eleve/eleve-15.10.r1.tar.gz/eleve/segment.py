@@ -1,0 +1,72 @@
+""" :mod:`eleve.segment`
+==========================
+
+The segmenter is available by importing ``eleve.Segmenter``.  It is used to
+segment sentences (regroup tokens that goes together).
+
+"""
+import logging
+from math import isnan
+
+logger = logging.getLogger(__name__)
+
+class Segmenter:
+    def __init__(self, storage, max_ngram_length=None):
+        """ Create a segmenter.
+
+        :param storage: A storage object that has been trained on a corpus (should have a ``query_autonomy`` method).
+        :param max_ngram_length: The maximum length of n-gram that can be "merged".
+            It should be strictly smaller to the storage's n-gram length.
+        """
+        assert hasattr(storage, 'query_autonomy'), "The storage object should have a query_autonomy method."
+        self.storage = storage
+        if max_ngram_length is None:
+            assert hasattr(storage, 'default_ngram_length'), "The storage should have a default_ngram_length attribute."
+            self.max_ngram_length = storage.default_ngram_length - 1
+        else:
+            assert isinstance(max_ngram_length, int) and max_ngram_length > 1, \
+               "max_ngram_length should be an integer bigger than one"
+            if max_ngram_length >= storage.default_ngram_length:
+                logger.warning("consider n-grams of size %d at max, BUT storage backend has a default ngram length of %s." % (max_ngram_length, storage.default_ngram_length))
+            self.max_ngram_length = max_ngram_length
+
+    def segment(self, sentence):
+        """ Segment a sentence.
+
+        :param sentence: A list of tokens.
+        :returns: A list of sentence fragments. A sentence fragment is a list of tokens.
+        """
+        if len(sentence) > 1000:
+            logger.warning("The sentence you want to segment is HUGE. This will take a lot of memory.")
+
+        sentence = [self.storage.sentence_start] + sentence + [self.storage.sentence_end]
+
+        # dynamic programming to segment the sentence
+        best_segmentation = [[]]*(len(sentence) + 1)
+        best_score = [0] + [float('-inf')]*len(sentence)
+
+        # best_score[1] -> autonomy of the first word
+        # best_score[2] -> sum of autonomy of the first two words, or autonomy of the first two
+        # ...
+        order = self.max_ngram_length
+        query_autonomy = self.storage.query_autonomy
+        for i in range(1, len(sentence) + 1):
+            for j in range(1, order + 1):
+                if i - j < 0:
+                    break
+                a = query_autonomy(sentence[i-j:i])
+                if isnan(a):
+                    a = -100.
+                score = best_score[i-j] + a * j
+                if score > best_score[i]:
+                    best_score[i] = score
+                    best_segmentation[i] = best_segmentation[i-j] + [sentence[i-j:i]]
+
+        # keep the best segmentation and remove the None
+        best_segmentation = best_segmentation[len(sentence)]
+        best_segmentation[0].pop(0)
+        best_segmentation[-1].pop()
+        best_segmentation = list(filter(None, best_segmentation))
+
+        return best_segmentation
+
