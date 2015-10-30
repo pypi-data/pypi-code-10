@@ -1,0 +1,11 @@
+__version__ = "0.1.7"
+__git_commiter_name__ = "Guy Rozendorn"
+__git_commiter_email__ = "guy@rzn.co.il"
+__git_branch__ = 'develop'
+__git_remote_tracking_branch__ = 'origin/develop'
+__git_remote_url__ = 'git@git.infinidat.com:host-opensource/infi.os_info.git'
+__git_head_hash__ = '882e06c9979c4e6ca58462f5cea2f3dbb55c9f27'
+__git_head_subject__ = 'Finished release v0.1.7.'
+__git_head_message__ = '* release/v0.1.7:\n  Python 3 fix'
+__git_dirty_diff__ = ''
+__git_commit_date__ = '2015-10-30 13:35:46'
