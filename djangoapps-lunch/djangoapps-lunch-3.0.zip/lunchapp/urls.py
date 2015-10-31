@@ -1,0 +1,40 @@
+__author__ = 'xueqing'
+from django.conf.urls import patterns,url
+from lunchapp.views import aaaa,product_category_list_template,product_category_add_template
+from lunchapp import views
+
+urlpatterns = patterns(
+    '',
+    url(r'^$',views.index),
+    url(r'^aaaa/$', aaaa.as_view()),
+    url(r'^product_category_add_template/$', product_category_add_template.as_view()),
+    url(r'^product_category_list_template/$',product_category_list_template.as_view()),
+    url(r'^product_category_add/$', views.product_category_add),
+    url(r'^product_category_list/$', views.product_category_list),
+    url(r'^product_category_detail_template/$',views.product_category_detail_template),
+    url(r'^product_category_detail/(?P<category_id>[0-9]+)/$',views.product_category_detail),
+    url(r'^product_category_delete/(?P<category_id>[0-9]+)/$',views.product_category_delete),
+    url(r'^product_list_template/$', views.product_list_template),
+    url(r'^product_add_template/$', views.product_add_template),
+    url(r'^product_add/$', views.product_add),
+    url(r'^product_list/$', views.product_list),
+    url(r'^product_detail_template/$',views.product_detail_template),
+    url(r'^product_detail/(?P<product_id>[0-9]+)/$',views.product_detail),
+    url(r'^product_delete/(?P<product_id>[0-9]+)/$',views.product_delete),
+    url(r'^order_add_template/$',views.order_add_template),
+    url(r'^account_charge_template/$',views.account_charge_template),
+    url(r'^order_add/$',views.order_add),
+    url(r'^orderlines_get/$',views.orderlines_get),
+    url(r'^orders_get/$',views.orders_get),
+    url(r'^my_orders_template/$',views.my_orders_template),
+    url(r'^order_line_cancel/$',views.order_line_cancel),
+    url(r'^order_line_operation_template/$',views.order_line_operation_template),
+    url(r'^order_line_operate/$',views.order_line_operate),
+    url(r'^all_orders_template/$',views.all_orders_template),
+    url(r'^all_orderlines_get/$',views.all_orderlines_get),
+    url(r'create_cashmove/$',views.create_cashmove),
+    url(r'all_cashmove_template/$',views.all_cashmove_template),
+    url(r'all_cashmove/$',views.all_cashmove),
+    url(r'my_cashmove_template/$',views.my_cashmove_template),
+    url(r'my_cashmove/$',views.my_cashmove),
+)
