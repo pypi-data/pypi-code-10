@@ -1,0 +1,2 @@
+import quanta
+quanta.main()
