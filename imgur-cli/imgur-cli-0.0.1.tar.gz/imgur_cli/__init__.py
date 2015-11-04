@@ -1,0 +1,6 @@
+__title__ = 'imgur-cli'
+__author__ = 'Usman Ehtesham Gul'
+__email__ = 'uehtesham90@gmail.com'
+__license__ = 'MIT'
+__version__ = '0.0.1'
+__url__ = 'https://github.com/ueg1990/imgur-cli.git'
