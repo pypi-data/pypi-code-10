@@ -1,0 +1,4 @@
+
+class StepValidationError(Exception):
+    pass
+
