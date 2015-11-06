@@ -1,0 +1,123 @@
+'''
+Abstract arithmetic operations
+'''
+
+from numbers import Number
+from generic import promote_type
+from generic.op import add, sub, mul, truediv, floordiv
+from .smallvectorsbase import ABC, SmallVectorsBase
+
+
+#
+# Elementwise summation
+#
+class AddElementWise(ABC):
+    '''Implements elementwise addition and subtraction'''
+
+    def __addsame__(self, other):
+        return _from_data(self, [x + y for (x, y) in zip(self.flat, other.flat)])
+    
+    def __subsame__(self, other):
+        return _from_data(self, [x - y for (x, y) in zip(self.flat, other.flat)])
+    
+@add.factory(AddElementWise, AddElementWise)
+def add_elementwise_factory(argtypes, restype):
+    T, S = argtypes
+    if issubclass(T, S):
+        return S.__addsame__
+    if issubclass(S, T):
+        return T.__addsame__
+    if T.__origin__ is not S.__origin__:
+        return NotImplemented
+    if T.shape != S.shape:
+        return NotImplemented
+        
+    dtype = promote_type(T.dtype, S.dtype)
+    def func(u, v):
+        return u.convert(dtype) + v.convert(dtype)
+    return func
+    
+@sub.factory(AddElementWise, AddElementWise)
+def sub_elementwise_factory(argtypes, restype):
+    T, S = argtypes
+    if issubclass(T, S):
+        return S.__subsame__
+    if issubclass(S, T):
+        return T.__subsame__
+    if T.__origin__ is not S.__origin__:
+        return NotImplemented
+    elif T.shape != S.shape:
+        return NotImplemented
+        
+    dtype = promote_type(T.dtype, S.dtype)
+    def func(u, v):
+        return u.convert(dtype) - v.convert(dtype)
+    return func
+    
+#
+# Elementwise multiplication
+#
+class MulElementWise(ABC):
+    '''Implements elementwise multiplication and division'''
+    
+#
+# Scalar multiplication
+#
+class MulScalar(ABC):
+    '''Implements scalar multiplication and division'''
+            
+@mul.register(MulScalar, Number)
+def mul_scalar(u, number):
+    return _from_data(u, [x * number for x in u])
+
+@mul.register(Number,MulScalar)
+def rmul_scalar(number, u):
+    return _from_data(u, [x * number for x in u])
+
+@truediv.register(MulScalar, Number)
+def truediv_scalar(u, number):
+    return _from_data(u, [x / number for x in u])
+
+@floordiv.register(MulScalar, Number)
+def floordiv_scalar(u, number):
+    return _from_data(u, [x // number for x in u])
+
+    
+class AddScalar(ABC):
+    '''Implements scalar addition and subtraction'''
+
+
+#
+# Utility functions
+# 
+def _check_scalar(obj, other, op):
+    # Fasttrack most common scalar types
+    if isinstance(other, (obj.dtype, float, int, Number)):
+        return
+    
+    elif obj.__origin__ is getattr(other, '__origin__', None):
+        tname = obj.__origin__.__name__
+        raise TypeError('%s instances only accept scalar multiplication' % tname)
+    
+    elif isinstance(other, (list, tuple, SmallVectorsBase)):
+        return op(obj, other)
+
+def _check_vector(obj, other, op):
+    try:
+        if obj.__class__ is other.__class__:
+            return
+        if obj.__origin__ is other.__origin__:
+            if obj.shape != other.shape:
+                data = obj.shape, other.shape
+                raise ValueError('incompatible shapes: %s and %s' % data)
+            return
+    except AttributeError:
+        return op(obj, other)
+    
+def _from_data(obj, data):
+    if isinstance(data[0], obj.dtype):
+        return type(obj).fromflat(data, copy=False)
+    else:
+        dtype = type(data[0])
+        cls = obj.__origin__[obj.shape + (dtype,)]
+        return cls.fromflat(data, copy=False)
