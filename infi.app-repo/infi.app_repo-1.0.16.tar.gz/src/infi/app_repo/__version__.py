@@ -1,0 +1,10 @@
+__version__ = "1.0.16"
+__git_commiter_name__ = "Guy Rozendorn"
+__git_commiter_email__ = "guy@rzn.co.il"
+__git_branch__ = '(HEAD detached at v1.0.16)'
+__git_remote_tracking_branch__ = '(No remote tracking)'
+__git_remote_url__ = '(Not remote tracking)'
+__git_head_hash__ = 'a8c762ffe2e786d0c13d60a6b4d8d4408a61b4a2'
+__git_head_subject__ = 'APR-40 increasing log level in delete_packages'
+__git_head_message__ = ''
+__git_dirty_diff__ = ''
