@@ -1,0 +1,10 @@
+__version__ = "0.1.11"
+__git_commiter_name__ = "amirr"
+__git_commiter_email__ = "amirr@infinidat.com"
+__git_branch__ = '(HEAD detached at v0.1.11)'
+__git_remote_tracking_branch__ = '(No remote tracking)'
+__git_remote_url__ = '(Not remote tracking)'
+__git_head_hash__ = '44367d0d056a8227fbafc4fa1f4529aa492060bc'
+__git_head_subject__ = 'HPT-1661 added free -m to log collection'
+__git_head_message__ = ''
+__git_dirty_diff__ = ''
