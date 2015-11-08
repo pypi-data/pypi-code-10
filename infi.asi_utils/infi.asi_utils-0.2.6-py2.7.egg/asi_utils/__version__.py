@@ -1,0 +1,11 @@
+__version__ = "0.2.6"
+__git_commiter_name__ = "Oded Badt"
+__git_commiter_email__ = "obadt@infinidat.com"
+__git_branch__ = '(HEAD detached at v0.2.6)'
+__git_remote_tracking_branch__ = '(No remote tracking)'
+__git_remote_url__ = '(Not remote tracking)'
+__git_head_hash__ = 'e0f24e53304ca6a4a3ce8efdea0e7babafe7aa14'
+__git_head_subject__ = 'Fixed malformed command line argument config'
+__git_head_message__ = ''
+__git_dirty_diff__ = ''
+__git_commit_date__ = '2015-10-18 15:08:27'
