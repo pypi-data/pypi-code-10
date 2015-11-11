@@ -1,0 +1,11 @@
+__version__ = "0.7.2"
+__git_commiter_name__ = "Itai Shirav"
+__git_commiter_email__ = "itais@infinidat.com"
+__git_branch__ = '(detached from v0.7.2)'
+__git_remote_tracking_branch__ = '(No remote tracking)'
+__git_remote_url__ = '(Not remote tracking)'
+__git_head_hash__ = 'b8694b486716b9eef20f9fa56e546ee105a39d45'
+__git_head_subject__ = 'Add SimpleFilter (WIP)'
+__git_head_message__ = ''
+__git_dirty_diff__ = ''
+__git_commit_date__ = '2015-11-05 17:30:58'
