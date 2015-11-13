@@ -1,0 +1,2 @@
+DIRECTORY_INDEX = False
+EXPAND_USER = False
