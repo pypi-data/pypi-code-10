@@ -1,0 +1,45 @@
+
+class Config(object):
+    PILOT_GOOGLE_ANALYTICS_ID = ""
+    PILOT_USER_LOGIN_EMAIL_ENABLE = True
+    PILOT_USER_LOGIN_OAUTH_ENABLE = True
+    PILOT_USER_LOGIN_SIGNUP_ENABLE = True
+    PILOT_USER_LOGIN_OAUTH_CREDENTIALS = {
+        "FACEBOOK": {
+            "ENABLE": False,
+            "CLIENT_ID": ""
+        },
+        "GOOGLE": {
+            "ENABLE": False,
+            "CLIENT_ID": ""
+        }
+    }
+
+    PILOT_MAINTENANCE_ON = False
+    PILOT_CONTACT_EMAIL = ""
+
+
+    # AWS for S3 + SES-Mailer
+    PILOT_AWS_ACCESS_KEY = ""
+    PILOT_AWS_SECRET_KEY = ""
+    PILOT_AWS_S3_BUCKET = ""
+
+    # KV Session
+    PILOT_SESSION_BACKEND = "REDIS"
+    PILOT_SESSION_DSN = ""
+
+    # FLASK-RECAPTCHA
+    RECAPTCHA_SITE_KEY = ""
+    RECAPTCHA_SECRET_KEY = ""
+
+    SES_MAILER_AWS_ACCESS_KEY_ID = ""
+    SES_MAILER_AWS_SECRET_ACCESS_KEY = AWS_SECRET_ACCESS_KEY
+
+    SES_MAILER_SENDER = ADMIN_EMAIL
+    SES_MAILER_REPLY_TO = ADMIN_EMAIL
+    SES_MAILER_TEMPLATE_DIR = ROOT_DIR + "/utils/ses-mailer-templates"
+    SES_MAILER_TEMPLATE_FILE_EXTENSION = ".txt"
+    SES_MAILER_TEMPLATE_DEFAULT_CONTEXT = {
+        "site_name": NAME,
+        "site_url": URL
+    }
