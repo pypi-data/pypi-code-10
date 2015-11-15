@@ -1,0 +1,42 @@
+# coding:utf-8
+
+from __future__ import unicode_literals
+from __future__ import absolute_import
+
+"""Flask-Restaction is a powerful flask ext for creat restful api
+
+.. versionchanged:: 0.19.0
+   ``ResourceException`` removed.
+   ``http_status_code_text`` removed.
+   ``abort_if_not_me`` removed.
+   ``abort`` removed, use flask.abort instead.
+   ``Resource.userrole`` removed, use Api.fn_user_role instead.
+"""
+import re
+import pkg_resources
+import logging
+
+__version__ = "0.18.1"
+
+logger = logging.getLogger("flask_restaction")
+
+pattern_action = re.compile(
+    r'^(get|post|put|delete|head|options|trace|patch){1}(?:_(.*))?$')
+pattern_endpoint = re.compile(r"^(?:(.*)\.)?(\w*)(?:@(.*))?$")
+res_js = pkg_resources.resource_string(__name__, "js/res.js")
+res_docs = pkg_resources.resource_string(__name__, "html/res_docs.html")
+
+res_js = res_js.decode("utf-8")
+res_docs = res_docs.decode("utf-8")
+
+
+from .exporters import exporters, exporter
+from .permission import Permission
+from .resource import Resource
+from .api import Api
+from validater import schema
+
+# __all__ can't be unicode
+__all__ = ["Api", "Resource", "schema", "Permission",
+           "exporters", "exporter", "__version__"]
+__all__ = [str(x) for x in __all__]
