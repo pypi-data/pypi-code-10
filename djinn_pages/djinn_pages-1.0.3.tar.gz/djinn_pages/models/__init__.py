@@ -1,0 +1,1 @@
+from djinn_pages.models.menu import MenuItem
