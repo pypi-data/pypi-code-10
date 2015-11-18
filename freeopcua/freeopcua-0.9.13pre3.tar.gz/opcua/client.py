@@ -1,0 +1,309 @@
+from __future__ import division  # support for python2
+from threading import Thread, Condition
+import logging
+try:
+    from urllib.parse import urlparse
+except ImportError:  # support for python2
+    from urlparse import urlparse
+
+from opcua import uaprotocol as ua
+from opcua import BinaryClient, Node, Subscription
+from opcua import utils
+
+
+class KeepAlive(Thread):
+
+    """
+    Used by Client to keep session opened.
+    OPCUA defines timeout both for sessions and secure channel
+    """
+
+    def __init__(self, client, timeout):
+        Thread.__init__(self)
+        self.logger = logging.getLogger(__name__)
+        if timeout == 0:  # means no timeout bu we do not trust such servers
+            timeout = 360000
+        self.timeout = timeout
+        self.client = client
+        self._dostop = False
+        self._cond = Condition()
+
+    def run(self):
+        self.logger.debug("starting keepalive thread with period of %s milliseconds", self.timeout)
+        server_state = self.client.get_node(ua.FourByteNodeId(ua.ObjectIds.Server_ServerStatus_State))
+        while not self._dostop:
+            with self._cond:
+                self._cond.wait(self.timeout / 1000)
+            if self._dostop:
+                break
+            self.logger.debug("renewing channel")
+            self.client.open_secure_channel(renew=True)
+            val = server_state.get_value()
+            self.logger.debug("server state is: %s ", val)
+        self.logger.debug("keepalive thread has stopped")
+
+    def stop(self):
+        self.logger.debug("stoping keepalive thread")
+        with self._cond:
+            self._cond.notify_all()
+        self._dostop = True
+
+
+class Client(object):
+
+    """
+    High level client to connect to an OPC-UA server.
+    This class makes it easy to connect and browse address space.
+    It attemps to expose as much functionality as possible
+    but if you want to do to special things you will probably need
+    to work with the BinaryClient object, available as self.bclient
+    which offers a raw OPC-UA interface.
+
+    """
+
+    def __init__(self, url, timeout=1):
+        """
+        used url argument to connect to server.
+        if you are unsure of url, write at least hostname and port
+        and call get_endpoints
+        timeout is the timeout to get an answer for requests to server
+        """
+        self.logger = logging.getLogger(__name__)
+        self.server_url = urlparse(url)
+        self.name = "Pure Python Client"
+        self.description = self.name
+        self.application_uri = "urn:freeopcua:client"
+        self.product_uri = "urn:freeopcua.github.no:client"
+        self.security_policy_uri = "http://opcfoundation.org/UA/SecurityPolicy#None"
+        self.security_mode = ua.MessageSecurityMode.None_
+        self.secure_channel_id = None
+        self.default_timeout = 3600000
+        self.secure_channel_timeout = self.default_timeout
+        self.session_timeout = self.default_timeout
+        self.policy_ids = {
+            ua.UserTokenType.Anonymous: b'anonymous',
+            ua.UserTokenType.UserName: b'user_name',
+        }
+        self.server_certificate = None
+        self.bclient = BinaryClient(timeout)
+        self._nonce = None
+        self._session_counter = 1
+        self.keepalive = None
+
+    def get_server_endpoints(self):
+        """
+        Connect, ask server for endpoints, and disconnect
+        """
+        self.connect_socket()
+        self.send_hello()
+        self.open_secure_channel()
+        endpoints = self.get_endpoints()
+        self.close_secure_channel()
+        self.disconnect_socket()
+        return endpoints
+
+    def find_all_servers(self):
+        """
+        Connect, ask server for a list of known servers, and disconnect
+        """
+        self.connect_socket()
+        self.send_hello()
+        self.open_secure_channel()
+        servers = self.find_servers()
+        self.close_secure_channel()
+        self.disconnect_socket()
+        return servers
+
+    def connect(self):
+        """
+        High level method
+        Connect, create and activate session
+        """
+        self.connect_socket()
+        self.send_hello()
+        self.open_secure_channel()
+        self.create_session()
+        self.activate_session()
+
+    def disconnect(self):
+        """
+        High level method
+        Close session, secure channel and socket
+        """
+        self.close_session()
+        self.close_secure_channel()
+        self.disconnect_socket()
+
+    def connect_socket(self):
+        """
+        connect to socket defined in url
+        """
+        self.bclient.connect_socket(self.server_url.hostname, self.server_url.port)
+
+    def disconnect_socket(self):
+        self.bclient.disconnect_socket()
+
+    def send_hello(self):
+        """
+        Send OPC-UA hello to server
+        """
+        ack = self.bclient.send_hello(self.server_url.geturl())
+        # FIXME check ack
+
+    def open_secure_channel(self, renew=False):
+        """
+        Open secure channel, if renew is True, renew channel
+        """
+        params = ua.OpenSecureChannelParameters()
+        params.ClientProtocolVersion = 0
+        params.RequestType = ua.SecurityTokenRequestType.Issue
+        if renew:
+            params.RequestType = ua.SecurityTokenRequestType.Renew
+        params.SecurityMode = self.security_mode
+        params.RequestedLifetime = self.secure_channel_timeout
+        params.ClientNonce = '\x00'
+        result = self.bclient.open_secure_channel(params)
+        self.secure_channel_timeout = result.SecurityToken.RevisedLifetime
+
+    def close_secure_channel(self):
+        return self.bclient.close_secure_channel()
+
+    def get_endpoints(self):
+        params = ua.GetEndpointsParameters()
+        params.EndpointUrl = self.server_url.geturl()
+        return self.bclient.get_endpoints(params)
+
+    def find_servers(self):
+        params = ua.FindServersParameters()
+        return self.bclient.find_servers(params)
+
+    def create_session(self):
+        desc = ua.ApplicationDescription()
+        desc.ApplicationUri = self.application_uri
+        desc.ProductUri = self.product_uri
+        desc.ApplicationName = ua.LocalizedText(self.name)
+        desc.ApplicationType = ua.ApplicationType.Client
+
+        params = ua.CreateSessionParameters()
+        params.ClientNonce = utils.create_nonce()
+        params.ClientCertificate = b''
+        params.ClientDescription = desc
+        params.EndpointUrl = self.server_url.geturl()
+        params.SessionName = self.description + " Session" + str(self._session_counter)
+        params.RequestedSessionTimeout = 3600000
+        params.MaxResponseMessageSize = 0  # means no max size
+        response = self.bclient.create_session(params)
+        #print("Certificate is ", response.ServerCertificate)
+        self.server_certificate = response.ServerCertificate
+        for ep in response.ServerEndpoints:
+            if ep.SecurityMode == self.security_mode:
+                # remember PolicyId's: we will use them in activate_session()
+                for token in ep.UserIdentityTokens:
+                    self.policy_ids[token.TokenType] = token.PolicyId
+        self.session_timeout = response.RevisedSessionTimeout
+        self.keepalive = KeepAlive(self, min(self.session_timeout, self.secure_channel_timeout) * 0.7)  # 0.7 is from spec
+        self.keepalive.start()
+        return response
+
+    def activate_session(self):
+        params = ua.ActivateSessionParameters()
+        params.LocaleIds.append("en")
+        if not self.server_url.username:
+            params.UserIdentityToken = ua.AnonymousIdentityToken()
+            params.UserIdentityToken.PolicyId = self.policy_ids[ua.UserTokenType.Anonymous]
+        else:
+            params.UserIdentityToken = ua.UserNameIdentityToken()
+            params.UserIdentityToken.UserName = self.server_url.username 
+            if self.server_url.password:
+                raise NotImplementedError
+                #p = bytes(self.server_url.password, "utf8")
+                #p = self.server_url.password
+                #from Crypto.Cipher import PKCS1_OAEP
+                #from Crypto.PublicKey import RSA
+                #from binascii import a2b_base64
+                #from Crypto.Util.asn1 import DerSequence
+                #from IPython import embed
+                #import ssl
+                #print("TYPE", type(self.server_certificate))
+                #pem = self.server_certificate
+                # Convert from PEM to DER
+                #lines = str(pem).replace(" ",'').split()
+                #data = ''.join(lines[1:-1])
+                #embed()
+                #3data = bytes(data, "utf8")
+                #print("DATA", data)
+                #der = a2b_base64(pem)
+                #ssl.PEM_HEADER=""
+                #ssl.PEM_FOOTER=""
+                #der = ssl.PEM_cert_to_DER_cert(pem)
+                #print("DER", der)
+
+                # Extract subjectPublicKeyInfo field from X.509 certificate (see RFC3280)
+                #cert = DerSequence()
+                #cert.decode(der)
+                #tbsCertificate = DerSequence()
+                #tbsCertificate.decode(cert[0])
+                #key = tbsCertificate[6]
+                ##print("KEY2", key)
+
+
+                #r = RSA.importKey(key)
+                #cipher = PKCS1_OAEP.new(r)
+                #ciphertext = cipher.encrypt(p)
+                #params.UserIdentityToken.Password = ciphertext 
+                #print("KKK", self.policy_ids[ua.UserTokenType.UserName])
+            params.UserIdentityToken.PolicyId = self.policy_ids[ua.UserTokenType.UserName]
+            params.UserIdentityToken.EncryptionAlgorithm = 'http://www.w3.org/2001/04/xmlenc#rsa-oaep'
+        return self.bclient.activate_session(params)
+
+    def close_session(self):
+        """
+        Close session
+        """
+        if self.keepalive:
+            self.keepalive.stop()
+        return self.bclient.close_session(True)
+
+    def get_root_node(self):
+        return self.get_node(ua.TwoByteNodeId(ua.ObjectIds.RootFolder))
+
+    def get_objects_node(self):
+        return self.get_node(ua.TwoByteNodeId(ua.ObjectIds.ObjectsFolder))
+
+    def get_server_node(self):
+        return self.get_node(ua.TwoByteNodeId(ua.ObjectIds.Server))
+
+    def get_node(self, nodeid):
+        """
+        Get node using NodeId object or a string representing a NodeId
+        """
+        return Node(self.bclient, nodeid)
+
+    def create_subscription(self, period, handler):
+        """
+        Create a subscription.
+        returns a Subscription object which allow
+        to subscribe to events or data on server
+        handler argument is a class with data_change and/or event methods.
+        These methods will be called when notfication from server are received.
+        See example-client.py.
+        Do not do expensive/slow or network operation from these methods 
+        since they are called directly from receiving thread. This is a design choice,
+        start another thread if you need to do such a thing.
+        """
+        params = ua.CreateSubscriptionParameters()
+        params.RequestedPublishingInterval = period
+        params.RequestedLifetimeCount = 3000
+        params.RequestedMaxKeepAliveCount = 10000
+        params.MaxNotificationsPerPublish = 4294967295
+        params.PublishingEnabled = True
+        params.Priority = 0
+        return Subscription(self.bclient, params, handler)
+
+    def get_namespace_array(self):
+        ns_node = self.get_node(ua.NodeId(ua.ObjectIds.Server_NamespaceArray))
+        return ns_node.get_value()
+
+    def get_namespace_index(self, uri):
+        uries = self.get_namespace_array()
+        return uries.index(uri)
