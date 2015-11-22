@@ -1,0 +1,98 @@
+# -*- coding: utf-8 -*-
+"""Package declaration for heroku_tools/settings.
+
+Contains the CLI application settings (as distinct from the Heroku
+application settings, which are in the config module.)
+
+The settings themselves are loaded at the end of this module.
+
+>>> from heroku_tools import settings
+>>> settings.app_conf_dir
+foo/bar
+>>>
+
+"""
+import glob
+import os
+
+import click
+import yaml
+
+CWD = os.getcwd()
+
+DEFAULT_SETTINGS = {
+    'app_conf_dir': CWD,
+    'git_work_dir': CWD,
+    'commands': {
+        'migrate': 'python manage.py migrate',
+        'collectstatic': 'python manage.py collectstatic --noinput',
+    },
+    'heroku_api_token': os.getenv('HEROKU_API_TOKEN', ''),
+}
+
+
+def get_settings(filename):
+    """Load configuration for heroku-tools itself.
+
+    Configuration settings are read in in the following order:
+
+    - local .herokutoolsconf YAML file in current working directory
+    - DEFAULT_SETTINGS
+
+    This method is called within this module, making all settings available
+    to the rest of the application as heroku_tools.conf.settings.
+
+    """
+    settings = DEFAULT_SETTINGS
+
+    if filename in (None, ''):
+        click.echo(u"No config specified, default settings will be applied.")
+        return settings
+
+    if os.path.exists(filename):
+        click.echo(u"Applying settings from %s" % filename)
+        try:
+            with open(filename, 'r') as settings_file:
+                local = yaml.load(settings_file)
+                settings.update(local.get('settings', {}))
+                settings['commands'].update(local.get('commands', {}))
+                return settings
+        except IOError as ex:
+            # if we can't read the file just blast through with the defaults.
+            click.echo(".herokutoolsconf file could not be read: %s" % ex)
+            return settings
+    else:
+        click.echo(u"Config does not exist - %s" % filename)
+        click.echo(u"Default settings will be applied.")
+        return settings
+
+def _get_conf_files(app_conf_dir):
+    """Return list of all *.conf files in the app_conf_dir."""
+    files = glob.glob(os.path.join(app_conf_dir,'*.conf'))
+    return [f for f in files if os.path.isfile(f)]
+
+# the default settings can be overridden by a local '.herokutoolsconf' files
+_settings = get_settings(os.path.join(os.getcwd(), '.herokutoolsconf'))
+
+# provide easy access to the settings
+app_conf_dir = _settings['app_conf_dir']
+git_work_dir = _settings['git_work_dir']
+commands = _settings['commands']
+migrate_cmd = commands['migrate']
+collectstatic_cmd = commands['collectstatic']
+heroku_api_token = _settings['heroku_api_token']
+
+@click.command(name='settings')
+def print_settings():
+    """Print out current settings."""
+    click.echo(r"-------------------------------------")
+    click.echo(r"app_conf_dir      = %s" % app_conf_dir)
+    click.echo(r"git_work_dir      = %s" % git_work_dir)
+    click.echo(r"migrate_cmd       = %s" % migrate_cmd)
+    click.echo(r"collectstatic_cmd = %s" % collectstatic_cmd)
+    click.echo(r"heroku_api_token  = %s" % heroku_api_token)
+    click.echo(r"-------------------------------------")
+
+    if _get_conf_files(app_conf_dir) == []:
+        click.echo(r"**** WARNINGS ****")
+        click.echo(r"No .conf files found in app_conf_dir")
