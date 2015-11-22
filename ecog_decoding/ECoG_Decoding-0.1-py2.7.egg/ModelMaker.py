@@ -1,0 +1,276 @@
+from keras.models import Sequential
+from keras.layers.core import Dense, Dropout, Activation, Flatten
+from keras.optimizers import SGD, adam, RMSprop, adagrad, Adadelta
+from keras.layers.normalization import BatchNormalization
+from keras.layers.convolutional import Convolution1D, MaxPooling1D
+from keras.layers.advanced_activations import PReLU
+from keras.layers.recurrent import LSTM, GRU
+from keras.utils import np_utils
+from keras.regularizers import l2
+
+def makemodel(dims,feats,nb_classes ,model_num):
+    
+    dims=dims
+    feats=feats
+    nb_classes=nb_classes
+    model_num=model_num
+     
+    #model
+    if model_num==1:
+        model = Sequential()
+        model.add(Convolution1D(input_shape=(dims,feats), nb_filter=32,filter_length=5,border_mode='full'))
+        model.add(Convolution1D(nb_filter=32,filter_length=5,border_mode='full'))
+        model.add(MaxPooling1D(pool_length=2))
+        model.add(Dropout(0.5))
+        model.add(Convolution1D(nb_filter=64,filter_length=5,border_mode='full'))
+        model.add(Convolution1D(nb_filter=64,filter_length=5,border_mode='full'))
+        #model.add(MaxPooling1D(pool_length=2))
+        #model.add(Dropout(0.5)) 
+        model.add(Convolution1D(nb_filter=64,filter_length=5,border_mode='full'))
+        model.add(Convolution1D(nb_filter=64,filter_length=5,border_mode='full'))
+        model.add(MaxPooling1D(pool_length=2))
+        #model.add(Dropout(0.5))  
+        model.add(Convolution1D(nb_filter=128,filter_length=5,border_mode='full'))
+        model.add(Convolution1D(nb_filter=128,filter_length=5,border_mode='full'))
+        model.add(MaxPooling1D(pool_length=2))
+        #model.add(Dropout(0.5))   
+        model.add(Convolution1D(nb_filter=256,filter_length=5,border_mode='full'))
+        model.add(Convolution1D(nb_filter=256,filter_length=5,border_mode='full'))
+        model.add(MaxPooling1D(pool_length=2))
+        model.add(Dropout(0.5))   
+        model.add(Flatten())
+        model.add(Dense(512))
+        model.add(PReLU())
+        model.add(Dropout(0.5))
+        model.add(Dense(nb_classes))
+        model.add(Activation('softmax'))
+        model.compile(loss='categorical_crossentropy', optimizer="adam") #loss='mean_squared_error'
+    
+        
+        model.add(Flatten())
+        model.add(Dense(512))
+        model.add(PReLU())
+        model.add(Dropout(0.5))
+        model.add(Dense(nb_classes))
+        model.add(Activation('softmax'))
+        model.compile(loss='categorical_crossentropy', optimizer="adam") #loss='mean_squared_error'
+    
+    
+    #model
+    if model_num==2:
+        model = Sequential()
+        model.add(Convolution1D(input_shape=(dims,feats), nb_filter=32,filter_length=5,border_mode='full'))
+        model.add(Convolution1D(nb_filter=32,filter_length=5,border_mode='full'))
+        model.add(MaxPooling1D(pool_length=2))
+        model.add(Dropout(0.5))
+        model.add(Convolution1D(nb_filter=32,filter_length=5,border_mode='full'))
+        model.add(Convolution1D(nb_filter=32,filter_length=5,border_mode='full'))
+        model.add(MaxPooling1D(pool_length=2))
+        model.add(Dropout(0.5)) 
+        model.add(Convolution1D(nb_filter=32,filter_length=5,border_mode='full'))
+        model.add(Convolution1D(nb_filter=32,filter_length=5,border_mode='full'))
+        model.add(MaxPooling1D(pool_length=2))
+        model.add(Dropout(0.5))  
+        model.add(Convolution1D(nb_filter=64,filter_length=5,border_mode='full'))
+        model.add(Convolution1D(nb_filter=64,filter_length=5,border_mode='full'))
+        model.add(MaxPooling1D(pool_length=2))
+        model.add(Dropout(0.5))   
+        model.add(Convolution1D(nb_filter=64,filter_length=5,border_mode='full'))
+        model.add(Convolution1D(nb_filter=64,filter_length=5,border_mode='full'))
+        model.add(MaxPooling1D(pool_length=2))
+        model.add(Dropout(0.5))   
+        model.add(Flatten())
+        model.add(Dense(512))
+        model.add(PReLU())
+        model.add(Dropout(0.5))
+        model.add(Dense(nb_classes))
+        model.add(Activation('softmax'))
+        model.compile(loss='categorical_crossentropy', optimizer="adam") #loss='mean_squared_error'
+    
+    #model
+    if model_num==3:    
+        model = Sequential()
+        model.add(Convolution1D(input_shape=(dims,feats), nb_filter=64,filter_length=5,border_mode='full'))
+        model.add(Convolution1D(nb_filter=64,filter_length=5,border_mode='full'))
+        model.add(MaxPooling1D(pool_length=2))
+        model.add(Dropout(0.5))
+        model.add(Convolution1D(nb_filter=64,filter_length=5,border_mode='full'))
+        model.add(Convolution1D(nb_filter=64,filter_length=5,border_mode='full'))
+        model.add(MaxPooling1D(pool_length=2))
+        model.add(Dropout(0.5)) 
+        model.add(Convolution1D(nb_filter=64,filter_length=5,border_mode='full'))
+        model.add(Convolution1D(nb_filter=64,filter_length=5,border_mode='full'))
+        model.add(MaxPooling1D(pool_length=2))
+        model.add(Dropout(0.5))  
+        model.add(Convolution1D(nb_filter=64,filter_length=5,border_mode='full'))
+        model.add(Convolution1D(nb_filter=64,filter_length=5,border_mode='full'))
+        model.add(MaxPooling1D(pool_length=2))
+        model.add(Dropout(0.5))   
+        model.add(Convolution1D(nb_filter=64,filter_length=5,border_mode='full'))
+        model.add(Convolution1D(nb_filter=64,filter_length=5,border_mode='full'))
+        model.add(MaxPooling1D(pool_length=2))
+        model.add(Dropout(0.5))   
+        model.add(Flatten())
+        model.add(Dense(512))
+        model.add(PReLU())
+        model.add(Dropout(0.5))
+        model.add(Dense(nb_classes))
+        model.add(Activation('softmax'))
+        model.compile(loss='categorical_crossentropy', optimizer="adam") #loss='mean_squared_error'
+    
+    #model
+    if model_num==4:  
+        model = Sequential()
+        model.add(Convolution1D(input_shape=(dims,feats), nb_filter=32,filter_length=7,border_mode='full'))
+        model.add(Convolution1D(nb_filter=32,filter_length=7,border_mode='full'))
+        model.add(MaxPooling1D(pool_length=2))
+        model.add(Dropout(0.5))
+        model.add(Convolution1D(nb_filter=32,filter_length=7,border_mode='full'))
+        model.add(Convolution1D(nb_filter=32,filter_length=7,border_mode='full'))
+        model.add(MaxPooling1D(pool_length=2))
+        model.add(Dropout(0.5)) 
+        model.add(Convolution1D(nb_filter=32,filter_length=7,border_mode='full'))
+        model.add(Convolution1D(nb_filter=32,filter_length=7,border_mode='full'))
+        model.add(MaxPooling1D(pool_length=2))
+        model.add(Dropout(0.5))  
+        model.add(Convolution1D(nb_filter=64,filter_length=7,border_mode='full'))
+        model.add(Convolution1D(nb_filter=64,filter_length=7,border_mode='full'))
+        model.add(MaxPooling1D(pool_length=2))
+        model.add(Dropout(0.5))   
+        model.add(Convolution1D(nb_filter=64,filter_length=7,border_mode='full'))
+        model.add(Convolution1D(nb_filter=64,filter_length=7,border_mode='full'))
+        model.add(MaxPooling1D(pool_length=2))
+        model.add(Dropout(0.5))   
+        model.add(Flatten())
+        model.add(Dense(512))
+        model.add(PReLU())
+        model.add(Dropout(0.5))
+        model.add(Dense(nb_classes))
+        model.add(Activation('softmax'))
+        model.compile(loss='categorical_crossentropy', optimizer="adam") #loss='mean_squared_error'
+    
+    #model
+    if model_num==5:
+        model = Sequential()
+        model.add(Convolution1D(input_shape=(dims,feats), nb_filter=32,filter_length=5,border_mode='full'))
+        model.add(Convolution1D(nb_filter=32,filter_length=5,border_mode='full'))
+        model.add(MaxPooling1D(pool_length=2))
+        model.add(Dropout(0.5))
+        model.add(Convolution1D(nb_filter=32,filter_length=5,border_mode='full'))
+        model.add(Convolution1D(nb_filter=32,filter_length=5,border_mode='full'))
+        model.add(MaxPooling1D(pool_length=2))
+        model.add(Dropout(0.5)) 
+        model.add(Convolution1D(nb_filter=64,filter_length=5,border_mode='full'))
+        model.add(Convolution1D(nb_filter=64,filter_length=5,border_mode='full'))
+        model.add(MaxPooling1D(pool_length=2))
+        model.add(Dropout(0.5))  
+        model.add(Convolution1D(nb_filter=64,filter_length=5,border_mode='full'))
+        model.add(Convolution1D(nb_filter=64,filter_length=5,border_mode='full'))
+        model.add(MaxPooling1D(pool_length=2))
+        model.add(Dropout(0.5))   
+        model.add(Convolution1D(nb_filter=64,filter_length=5,border_mode='full'))
+        model.add(Convolution1D(nb_filter=64,filter_length=5,border_mode='full'))
+        model.add(MaxPooling1D(pool_length=2))
+        model.add(Dropout(0.5))   
+        model.add(Flatten())
+        model.add(Dense(512))
+        model.add(PReLU())
+        model.add(Dropout(0.5))
+        model.add(Dense(nb_classes))
+        model.add(Activation('softmax'))
+        model.compile(loss='categorical_crossentropy', optimizer="adam") #loss='mean_squared_error'
+    
+    #model
+    if model_num==6:    
+        model = Sequential()
+        model.add(Convolution1D(input_shape=(dims,feats), nb_filter=32,filter_length=10,border_mode='full'))
+        model.add(Convolution1D(nb_filter=32,filter_length=10,border_mode='full'))
+        model.add(MaxPooling1D(pool_length=2))
+        model.add(Dropout(0.5))
+        model.add(Convolution1D(nb_filter=32,filter_length=10,border_mode='full'))
+        model.add(Convolution1D(nb_filter=32,filter_length=10,border_mode='full'))
+        model.add(MaxPooling1D(pool_length=2))
+        model.add(Dropout(0.5)) 
+        model.add(Convolution1D(nb_filter=32,filter_length=10,border_mode='full'))
+        model.add(Convolution1D(nb_filter=32,filter_length=10,border_mode='full'))
+        model.add(MaxPooling1D(pool_length=2))
+        model.add(Dropout(0.5))  
+        model.add(Convolution1D(nb_filter=32,filter_length=10,border_mode='full'))
+        model.add(Convolution1D(nb_filter=32,filter_length=10,border_mode='full'))
+        model.add(MaxPooling1D(pool_length=2))
+        model.add(Dropout(0.5))   
+        model.add(Convolution1D(nb_filter=32,filter_length=10,border_mode='full'))
+        model.add(Convolution1D(nb_filter=32,filter_length=10,border_mode='full'))
+        model.add(MaxPooling1D(pool_length=2))
+        model.add(Dropout(0.5))   
+        model.add(Flatten())
+        model.add(Dense(512))
+        model.add(PReLU())
+        model.add(Dropout(0.5))
+        model.add(Dense(nb_classes))
+        model.add(Activation('softmax'))
+        model.compile(loss='categorical_crossentropy', optimizer="adam") #loss='mean_squared_error'
+        
+    if model_num==7:    
+        model = Sequential()
+        model.add(Convolution1D(input_shape=(dims,feats), nb_filter=32,filter_length=15,border_mode='full'))
+        model.add(Convolution1D(nb_filter=32,filter_length=15,border_mode='full'))
+        model.add(MaxPooling1D(pool_length=2))
+        model.add(Dropout(0.5))
+        model.add(Convolution1D(nb_filter=32,filter_length=15,border_mode='full'))
+        model.add(Convolution1D(nb_filter=32,filter_length=15,border_mode='full'))
+        model.add(MaxPooling1D(pool_length=2))
+        model.add(Dropout(0.5)) 
+        model.add(Convolution1D(nb_filter=32,filter_length=15,border_mode='full'))
+        model.add(Convolution1D(nb_filter=32,filter_length=15,border_mode='full'))
+        model.add(MaxPooling1D(pool_length=2))
+        model.add(Dropout(0.5))  
+        model.add(Convolution1D(nb_filter=32,filter_length=15,border_mode='full'))
+        model.add(Convolution1D(nb_filter=32,filter_length=15,border_mode='full'))
+        model.add(MaxPooling1D(pool_length=2))
+        model.add(Dropout(0.5))   
+        model.add(Convolution1D(nb_filter=32,filter_length=15,border_mode='full'))
+        model.add(Convolution1D(nb_filter=32,filter_length=15,border_mode='full'))
+        model.add(MaxPooling1D(pool_length=2))
+        model.add(Dropout(0.5))   
+        model.add(Flatten())
+        model.add(Dense(512))
+        model.add(PReLU())
+        model.add(Dropout(0.5))
+        model.add(Dense(nb_classes))
+        model.add(Activation('softmax'))
+        model.compile(loss='categorical_crossentropy', optimizer="adam") #loss='mean_squared_error'
+        
+        
+    if model_num==8:    
+        model = Sequential()
+        model.add(Convolution1D(input_shape=(dims,feats), nb_filter=32,filter_length=20,border_mode='full'))
+        model.add(Convolution1D(nb_filter=32,filter_length=20,border_mode='full'))
+        model.add(MaxPooling1D(pool_length=2))
+        model.add(Dropout(0.5))
+        model.add(Convolution1D(nb_filter=32,filter_length=20,border_mode='full'))
+        model.add(Convolution1D(nb_filter=32,filter_length=20,border_mode='full'))
+        model.add(MaxPooling1D(pool_length=2))
+        model.add(Dropout(0.5)) 
+        model.add(Convolution1D(nb_filter=32,filter_length=20,border_mode='full'))
+        model.add(Convolution1D(nb_filter=32,filter_length=20,border_mode='full'))
+        model.add(MaxPooling1D(pool_length=2))
+        model.add(Dropout(0.5))  
+        model.add(Convolution1D(nb_filter=32,filter_length=20,border_mode='full'))
+        model.add(Convolution1D(nb_filter=32,filter_length=20,border_mode='full'))
+        model.add(MaxPooling1D(pool_length=2))
+        model.add(Dropout(0.5))   
+        model.add(Convolution1D(nb_filter=32,filter_length=20,border_mode='full'))
+        model.add(Convolution1D(nb_filter=32,filter_length=20,border_mode='full'))
+        model.add(MaxPooling1D(pool_length=2))
+        model.add(Dropout(0.5))   
+        model.add(Flatten())
+        model.add(Dense(512))
+        model.add(PReLU())
+        model.add(Dropout(0.5))
+        model.add(Dense(nb_classes))
+        model.add(Activation('softmax'))
+        model.compile(loss='categorical_crossentropy', optimizer="adam") #loss='mean_squared_error'
+        
+
+    return model
