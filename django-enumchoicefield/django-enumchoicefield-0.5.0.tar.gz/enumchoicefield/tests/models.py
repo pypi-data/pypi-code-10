@@ -1,0 +1,32 @@
+from django.db import models
+
+
+from enumchoicefield.fields import EnumChoiceField
+from enumchoicefield.enum import ChoiceEnum
+
+
+class MyEnum(ChoiceEnum):
+    foo = "Foo"
+    bar = "Bar"
+    baz = "Baz Quux"
+
+
+class BaseModel(models.Model):
+    class Meta:
+        abstract = True
+        ordering = ('id',)
+
+
+class ChoiceModel(BaseModel):
+    choice = EnumChoiceField(MyEnum)
+
+    def __str__(self):
+        return '{} chosen'.format(self.choice)
+
+
+class NullableChoiceModel(BaseModel):
+    choice = EnumChoiceField(MyEnum, null=True, blank=True)
+
+
+class DefaultChoiceModel(BaseModel):
+    choice = EnumChoiceField(MyEnum, default=MyEnum.baz)
