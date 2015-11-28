@@ -1,0 +1,36 @@
+import os
+import sys
+import time
+from math import sqrt
+
+from simple_oss import SimpleOss
+
+OSS_HOST = os.environ.get('ALI_DIKU_OSS_HOST')
+
+ID = '5slyhuy4sv30bmppvgew0rps'
+KEY = 'NGYL1I7hXC6SgSqkcE5DJdPgJM8='
+BUCKET = 'diku-e2e-test-qingdao'
+
+OUTPUT_PATH = 'batch-python-sdk/output/find_task_result.txt'
+
+start_num = 0
+end_num = 10000
+oss_clnt = SimpleOss(OSS_HOST, ID, KEY)
+
+def find_task():
+    is_prime = lambda x: 0 not in [ x%d for d in range(2, int(sqrt(x))+1)]
+    f = open('result.txt', 'w')
+    for num in xrange(start_num, end_num):
+        if is_prime(num): 
+            f.write(str(num) + '\n') 
+    f.close()
+    oss_clnt.upload(BUCKET, 'result.txt', OUTPUT_PATH)
+    return 0
+
+def main():
+    find_task()
+    return 0
+
+if __name__ == '__main__':
+    time.sleep(10000)
+    sys.exit(main())
