@@ -1,0 +1,4 @@
+
+
+class RIllegalStateError(Exception):
+    pass
