@@ -1,0 +1,11 @@
+__version__ = "0.9"
+__git_commiter_name__ = "Oded Badt"
+__git_commiter_email__ = "obadt@infinidat.com"
+__git_branch__ = '(HEAD detached at v0.9)'
+__git_remote_tracking_branch__ = '(No remote tracking)'
+__git_remote_url__ = '(Not remote tracking)'
+__git_head_hash__ = '4afa8524e0cb174aea284efd580c83e88a81e14a'
+__git_head_subject__ = 'Added decirator for ajax serving methods that return 403 instead of redirecting in case of non logged in user'
+__git_head_message__ = '(cherry picked from commit d7e0f38dd315b1095a0bb0e93aab48a9953bd4b7)\nSigned-off-by: Oded Badt <obadt@infinidat.com>'
+__git_dirty_diff__ = ''
+__git_commit_date__ = '2015-11-29 12:04:13'
