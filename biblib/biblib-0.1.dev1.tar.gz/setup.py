@@ -1,0 +1,36 @@
+import os
+from setuptools import setup
+from biblib import __version__
+
+
+# Utility function to read the README file.
+def read(fname):
+    return open(os.path.join(os.path.dirname(__file__), fname)).read()
+
+
+setup(
+    name = 'biblib',
+    version = __version__,
+    author = 'Frank Roemer',
+    author_email = 'froemer76@googlemail.com',
+    description = ("A library to handle BibTeX bibliographic data."),
+    license = "MIT",
+    keywords = "BibTeX ISBN DOI citation",
+    url = "http://packages.python.org/biblib",
+    packages=['biblib',
+              'biblib/dev'
+              ],
+    package_data={'': ['README', 'LICENSE']},
+    include_package_data=True,
+    long_description=read('README'),
+    install_requires=["isbnlib>=3.5.6"],
+    classifiers=[
+        'Operating System :: OS Independent',
+        'Development Status :: 3 - Alpha',
+        'License :: OSI Approved :: MIT License',
+        'Intended Audience :: Developers',
+        'Topic :: Text Processing :: General',
+        'Topic :: Text Processing :: Markup :: LaTeX',
+        'Topic :: Software Development :: Libraries :: Python Modules',
+    ]
+)
