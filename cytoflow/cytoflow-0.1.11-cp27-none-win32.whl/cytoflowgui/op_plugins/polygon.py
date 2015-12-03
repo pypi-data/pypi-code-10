@@ -1,0 +1,83 @@
+'''
+Created on Apr 25, 2015
+
+@author: brian
+'''
+
+from traitsui.api import View, Item, EnumEditor, Controller
+from envisage.api import Plugin, contributes_to
+from traits.api import provides, Callable
+from cytoflowgui.op_plugins import IOperationPlugin, OpHandlerMixin, OP_PLUGIN_EXT
+from cytoflow.operations.polygon import PolygonOp, PolygonSelection
+from pyface.api import ImageResource
+from cytoflowgui.view_plugins.i_view_plugin import ViewHandlerMixin, PluginViewMixin
+from cytoflowgui.subset_editor import SubsetEditor
+from cytoflow.views.i_selectionview import ISelectionView
+from cytoflowgui.op_plugins.i_op_plugin import PluginOpMixin
+from cytoflowgui.color_text_editor import ColorTextEditor
+
+class PolygonHandler(Controller, OpHandlerMixin):
+    def default_traits_view(self):
+        return View(Item('object.name'),
+                    Item('object.xchannel',
+                         editor=EnumEditor(name='handler.previous_channels'),
+                         label = "X Channel"),
+                    Item('object.ychannel',
+                         editor=EnumEditor(name='handler.previous_channels'),
+                         label = "Y Channel"),
+                    Item('handler.wi.error',
+                         label = 'Error',
+                         visible_when = 'handler.wi.error',
+                         editor = ColorTextEditor(foreground_color = "#000000",
+                                                  background_color = "#ff9191",
+                                                  word_wrap = True))) 
+        
+class PolygonViewHandler(Controller, ViewHandlerMixin):
+    def default_traits_view(self):
+        return View(Item('object.name', 
+                         style = 'readonly'),
+                    Item('object.xchannel', 
+                         label = "X Channel", 
+                         style = 'readonly'),
+                    Item('object.ychannel',
+                         label = "Y Channel",
+                         style = 'readonly'),
+                    Item('object.huefacet',
+                         editor=EnumEditor(name='handler.conditions'),
+                         label="Color\nFacet"),
+                    Item('_'),
+                    Item('object.subset',
+                         label = "Subset",
+                         editor = SubsetEditor(experiment = 'handler.wi.previous.result')))
+
+@provides(ISelectionView)
+class PolygonSelectionView(PolygonSelection, PluginViewMixin):
+    handler_factory = Callable(PolygonViewHandler)
+    
+class PolygonPluginOp(PolygonOp, PluginOpMixin):
+    handler_factory = Callable(PolygonHandler)
+
+@provides(IOperationPlugin)
+class PolygonPlugin(Plugin):
+    """
+    class docs
+    """
+    
+    id = 'edu.mit.synbio.cytoflowgui.op_plugins.polygon'
+    operation_id = 'edu.mit.synbio.cytoflow.operations.polygon'
+
+    short_name = "Polygon Gate"
+    menu_group = "Gates"
+    
+    def get_operation(self):
+        return PolygonPluginOp()
+    
+    def get_default_view(self):
+        return PolygonSelectionView()
+     
+    def get_icon(self):
+        return ImageResource('polygon')
+    
+    @contributes_to(OP_PLUGIN_EXT)
+    def get_plugin(self):
+        return self
