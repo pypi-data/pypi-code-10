@@ -1,0 +1,26 @@
+from distutils.core import setup
+setup(
+  name = 'go-vies',
+  py_modules = ['go_vies'],
+  version = '1.0.5',
+  description = 'VIES VAT Validation (like django-vies without Django dependencies)',
+  install_requires = ['suds-jurko >= 0.6', 'retrying >= 1.1.0'],
+  author = 'Mirek Zvolsky',
+  author_email = 'zvolsky@seznam.cz',
+  url = 'https://github.com/zvolsky/go-vies',
+  download_url = 'https://github.com/zvolsky/go-vies/tarball/1.0.5',
+  keywords = ['vies', 'vat'],
+  classifiers=[
+      'Development Status :: 5 - Production/Stable',
+      'Environment :: Web Environment',
+      'Topic :: Office/Business :: Financial :: Accounting',
+      'Intended Audience :: Developers',
+      'Intended Audience :: Financial and Insurance Industry',
+      'License :: OSI Approved :: MIT License',
+      'Operating System :: OS Independent',
+      'Programming Language :: Python',
+      'Topic :: Software Development',
+      'Programming Language :: Python :: 2',
+      'Programming Language :: Python :: 3',
+  ],
+)
