@@ -1,0 +1,11 @@
+#!/home/ivan/tmp/bin/python
+from imap_detach.cmd import main
+    
+if __name__ == '__main__':
+    main()
+
+
+    
+    
+
+    
