@@ -1,0 +1,3 @@
+from pyfav2 import get_favicon_url
+from pyfav2 import parse_markup_for_favicon
+from pyfav2 import download_favicon
