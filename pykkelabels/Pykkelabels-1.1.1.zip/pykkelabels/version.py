@@ -1,0 +1,6 @@
+__author__ = "Anders Brandt"
+__license__ = "MIT"
+__version__ = "1.1.1"
+__maintainer__ = "Anders Brandt"
+__email__ = "anderswb at  gmail dot com"
+__status__ = "Production"
