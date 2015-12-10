@@ -1,0 +1,167 @@
+import json
+from model.volume.settings.block_settings import BlockSettings
+from utils.converters.common.size_converter import SizeConverter
+from model.volume.settings.object_settings import ObjectSettings
+from utils.converters.common.credential_converter import CredentialConverter
+from utils.converters.volume.lun_permission_converter import LunPermissionConverter
+from model.volume.settings.iscsi_settings import ISCSISettings
+from utils.converters.volume.ip_filter_converter import IpFilterConverter
+from model.volume.settings.nfs_settings import NfsSettings
+
+class SettingsConverter(object):
+    '''
+    Created on Jun 1, 2015
+    
+    @author: nate
+    '''
+
+    @staticmethod
+    def to_json(settings):
+        
+        
+        j_settings = dict()
+        j_settings["type"] = settings.type
+        
+        if ( settings.type is "BLOCK" or settings.type is "ISCSI" or settings.type is "NFS"):
+            
+            j_settings["capacity"] = json.loads(SizeConverter.to_json(settings.capacity))
+            
+            if settings.block_size is not None:
+                j_settings["blockSize"] = json.loads(SizeConverter.to_json(settings.block_size))
+            
+            if ( settings.type is "ISCSI" ):
+                
+                d_target = dict()
+                
+                incoming_creds = []
+                for in_cred in settings.incoming_credentials:
+                    incoming_creds.append( json.loads( CredentialConverter.to_json(in_cred) ) )
+                    
+                d_target["incomingUsers"] = incoming_creds
+                
+                outgoing_creds = []
+                for out_cred in settings.outgoing_credentials:
+                    outgoing_creds.append( json.loads( CredentialConverter.to_json(out_cred) ) )
+                    
+                d_target["outgoingUsers"] = outgoing_creds
+                
+                lun_permissions = []
+                for lun in settings.lun_permissions:
+                    lun_permissions.append( json.loads( LunPermissionConverter.to_json( lun ) ) )
+                    
+                d_target["luns"] = lun_permissions
+                
+                initiators = []
+                for initiator in settings.initiators:
+                    j_init = dict()
+                    j_init["wwn_mask"] = initiator
+                    initiators.append( j_init )
+                    
+                d_target["initiators"] = initiators
+                
+                j_settings["target"] = d_target
+                
+            elif ( settings.type is "NFS" ):
+        
+                    options = dict()
+                    
+                    options['acl'] = settings.use_acls
+                    options['squash'] = settings.use_root_squash
+                    options['sync'] = settings.synchronous
+                    
+                    j_settings['options'] = options
+                    
+                    ip_filters = []
+                    
+                    for f in settings.ip_filters:
+                        ip_filters.append( json.loads(IpFilterConverter.to_json(f) ) )
+                    
+                    j_settings['ipFilters'] = ip_filters
+            #fi
+            
+        else:
+            
+            if settings.max_object_size is not None:
+                j_settings["maxObjectSize"] = json.loads(SizeConverter.to_json(settings.max_object_size))
+            
+        j_settings = json.dumps(j_settings)
+        
+        return j_settings
+    
+    @staticmethod
+    def build_settings_from_json(j_str):
+        
+        settings = None
+        
+        if not isinstance( j_str, dict ):
+            j_str = json.loads(j_str)
+        
+        volume_type = j_str.pop( "type" )
+        
+        if volume_type == "BLOCK" or volume_type == "ISCSI" or volume_type == "NFS":
+            
+            if volume_type == "BLOCK":
+                settings = BlockSettings()
+            elif volume_type == "ISCSI":
+                settings = ISCSISettings()
+            elif volume_type == "NFS":
+                settings = NfsSettings()
+            
+            if "blockSize" in j_str:
+                settings.block_size = SizeConverter.build_size_from_json( j_str.pop("blockSize", settings.block_size) )
+                
+            settings.capacity = SizeConverter.build_size_from_json( j_str.pop("capacity", settings.capacity) )
+            
+            if ( volume_type == "ISCSI" ):
+                
+                set_str = j_str.pop( "target" );
+                
+                initiators = set_str.pop( "initiators", [] )
+                
+                for initiator in initiators:
+                    settings.initiators.append( initiator.pop( "wwn_mask" ) )
+                
+                luns = set_str.pop( "luns", [] )
+                real_luns = []
+                for lun in luns:
+                    real_luns.append( LunPermissionConverter.build_lun_permission_from_json( lun ) )
+                
+                settings.lun_permissions = real_luns
+                
+                incoming_strs = set_str.pop( "incomingUsers", [] )
+                real_incoming = []
+                for incoming_str in incoming_strs:
+                    real_incoming.append( CredentialConverter.build_credential_from_json( incoming_str ) )
+                    
+                settings.incoming_credentials = real_incoming
+                
+                outgoing_strs = set_str.pop( "outgoingUsers", [] )
+                real_outgoing = []
+                for outgoing_str in outgoing_strs:
+                    real_outgoing.append( CredentialConverter.build_credential_from_json( outgoing_str ) )
+                    
+                settings.outgoing_credentials = real_outgoing
+                
+            elif ( volume_type == "NFS" ):
+                
+                options = j_str.pop( "options", [])
+                
+                settings.use_acls = options.pop( "acl", settings.use_acls )
+                settings.use_root_squash = options.pop( "squash", settings.use_root_squash )
+                settings.synchronous = options.pop( "synchronous", settings.synchronous )
+                
+                ip_filters = j_str.pop( "ipFilters", [])
+                real_filters = []
+                for filt in ip_filters:
+                    real_filters.append( IpFilterConverter.build_ip_filter_from_json( filt ) )
+                    
+                settings.ip_filters = real_filters
+            
+        else:
+            
+            settings = ObjectSettings()
+            
+            if "maxObjectSize" in j_str:
+                settings.max_object_size = SizeConverter.build_size_from_json( j_str.pop("maxObjectSize", settings.max_object_size) )
+            
+        return settings
