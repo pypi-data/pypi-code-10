@@ -1,0 +1,11 @@
+__version__ = "0.4.31"
+__git_commiter_name__ = "Arnon Yaari"
+__git_commiter_email__ = "arnony@infinidat.com"
+__git_branch__ = '(HEAD detached at v0.4.31)'
+__git_remote_tracking_branch__ = '(No remote tracking)'
+__git_remote_url__ = '(Not remote tracking)'
+__git_head_hash__ = 'bfef0b38a2934fde11f6d16d7e0e24947e98fe87'
+__git_head_subject__ = 'fix compare_pypi_repos'
+__git_head_message__ = ''
+__git_dirty_diff__ = ''
+__git_commit_date__ = '2015-11-17 18:48:36'
