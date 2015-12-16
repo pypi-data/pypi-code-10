@@ -1,0 +1,11 @@
+__version__ = "0.2.14"
+__git_commiter_name__ = "Arnon Yaari"
+__git_commiter_email__ = "arnony@infinidat.com"
+__git_branch__ = '(HEAD detached at v0.2.14)'
+__git_remote_tracking_branch__ = '(No remote tracking)'
+__git_remote_url__ = '(Not remote tracking)'
+__git_head_hash__ = '860ca96f211458f8748c30b8858741277565308a'
+__git_head_subject__ = 'update buildout.cfg'
+__git_head_message__ = ''
+__git_dirty_diff__ = ''
+__git_commit_date__ = '2015-11-27 13:39:23'
