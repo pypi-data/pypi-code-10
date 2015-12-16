@@ -1,0 +1,11 @@
+__version__ = "0.6.45"
+__git_commiter_name__ = "Arnon Yaari"
+__git_commiter_email__ = "arnony@infinidat.com"
+__git_branch__ = '(HEAD detached at v0.6.45)'
+__git_remote_tracking_branch__ = '(No remote tracking)'
+__git_remote_url__ = '(Not remote tracking)'
+__git_head_hash__ = 'c86d816ca020cbdf28cb1b4714ac283a7cbc3bcd'
+__git_head_subject__ = 'add comment in doc of version upload'
+__git_head_message__ = ''
+__git_dirty_diff__ = ''
+__git_commit_date__ = '2015-12-10 16:36:51'
