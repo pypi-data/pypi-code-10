@@ -1,0 +1,10 @@
+__version__ = "0.2.11"
+__git_commiter_name__ = "Tomer Galun"
+__git_commiter_email__ = "tomerg@infinidat.com"
+__git_branch__ = '(HEAD detached at v0.2.11)'
+__git_remote_tracking_branch__ = '(No remote tracking)'
+__git_remote_url__ = '(Not remote tracking)'
+__git_head_hash__ = 'b1632af4b70297736bcdea163a7feb0aba99704c'
+__git_head_subject__ = 'Revert "Revert "HOSTDEV-2252 fix parsing of partitions list""'
+__git_head_message__ = 'This reverts commit ea87dbdfb84c5aaeb8b7b81d10fb31ee7cbef05c.'
+__git_dirty_diff__ = ''
