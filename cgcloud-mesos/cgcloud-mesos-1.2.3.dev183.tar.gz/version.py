@@ -1,0 +1,5 @@
+fabric_version='1.10.2'
+bd2k_python_lib_version='1.11.dev6'
+cgcloud_version='1.2.3.dev183'
+parse_version='<function parse_version at 0x2b10eda22aa0>'
+boto_version='2.38.0'
