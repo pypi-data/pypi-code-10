@@ -1,0 +1,10 @@
+__version__ = "0.1.16"
+__git_commiter_name__ = "Arnon Yaari"
+__git_commiter_email__ = "arnony@infinidat.com"
+__git_branch__ = '(HEAD detached at v0.1.16)'
+__git_remote_tracking_branch__ = '(No remote tracking)'
+__git_remote_url__ = '(Not remote tracking)'
+__git_head_hash__ = 'a2d2567953b8382c4f058239692e4e51849f0e88'
+__git_head_subject__ = 'Revert "pass unverified sslContext to bypass server certificate verification"'
+__git_head_message__ = 'This reverts commit e5b3c1f4f523dd5a628ba0af072a3a41e86e7f5c.'
+__git_dirty_diff__ = ''
